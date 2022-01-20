@@ -1,31 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>Online Meet</title>
     <script defer src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
     <script src="/socket.io/socket.io.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.js" integrity="sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY=" crossorigin="anonymous"></script>
     <script src="script.js" defer></script>
-    <style>
-        #video-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, 300px);
-          grid-auto-rows: 300px;
-        }
-        
-        video {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-      </style>
-      <script>
+    <link rel="stylesheet" type="text/css" href="meet.css">
+    <script>
         const meet_code = "<%= meet_code %>"
     </script>
 </head>
+
 <body>
     <div id="video-grid"></div>
+    <div class="bottom-nav">
+        <button class='mic-icon' onclick="micOnOff()">
+          <span class="material-icons">
+            mic_off
+          </span>
+        </button>
+        <button class='video-icon' onclick="videoOnOff()">
+          <span class="material-icons">
+            videocam_off
+          </span>
+        </button>
+    </div>
 </body>
+
 </html>
