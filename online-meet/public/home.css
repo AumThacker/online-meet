@@ -1,0 +1,24 @@
+.title {
+    margin-top: 10%;
+    margin-left: 50px;
+    float: left;
+}
+
+.title p {
+    font-size: larger;
+}
+
+.image {
+    margin-top: 10%;
+    margin-left: 50%;
+}
+
+.image img {
+    width: 700px;
+    height: 400px;
+}
+
+.form-control {
+    display: inline;
+    margin-right: 10px;
+}
