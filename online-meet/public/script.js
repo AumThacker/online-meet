@@ -24,6 +24,9 @@ navigator.mediaDevices.getUserMedia({
         // connectToNewUser(userId, stream)
         setTimeout(connectToNewUser, 3000, userId, stream);
     })
+    socket.on("createMessage", message => {
+        $("ul").append(`<li class="message"><b>user</b><br/>${message}</li>`);
+    })
 })
 socket.on('user-disconnected', userId => {
     if (peers[userId]) peers[userId].close()
@@ -67,18 +70,14 @@ const micOnOff = () => {
 
 const turnOffMic = () => {
     const html = `
-    <span class="material-icons">
-        mic_off
-      </span>
+    <i class="bi bi-mic-mute-fill"></i>
     `
     document.querySelector('.mic-icon').innerHTML = html;
 }
 
 const turnOnMic = () => {
     const html = `
-    <span class="material-icons">
-        mic
-      </span>
+    <i class="bi bi-mic-fill"></i>
     `
     document.querySelector('.mic-icon').innerHTML = html;
 }
@@ -96,18 +95,21 @@ const videoOnOff = () => {
 
 const turnOffVideo = () => {
     const html = `
-    <span class="material-icons">
-        videocam_off
-      </span>
+    <i class="bi bi-camera-video-off-fill"></i>
     `
     document.querySelector('.video-icon').innerHTML = html;
 }
 
 const turnOnVideo = () => {
     const html = `
-    <span class="material-icons">
-        videocam
-      </span>
+    <i class="bi bi-camera-video-fill"></i>
     `
     document.querySelector('.video-icon').innerHTML = html;
+}
+
+const sendMessage = () => {
+    let message = document.getElementById('chat_message').value;
+    socket.emit('message', message);
+    document.getElementById('chat_message').value = "";
+    
 }

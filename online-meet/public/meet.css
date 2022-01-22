@@ -4,14 +4,14 @@ body {
 
 #video-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 300px);
-    grid-auto-rows: 300px;
+    grid-template-columns: repeat(auto-fill, 25%);
+    grid-auto-rows: 100%;
 }
 
 .bottom-nav {
     overflow: hidden;
     position: fixed;
-    background-color: #333;
+    background-color: black;
     bottom: 0;
     width: 100%;
 }
@@ -24,6 +24,7 @@ body {
 }
 
 video {
+    border-radius: 1.2vh;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -34,12 +35,73 @@ video {
 
 .video-icon {
     border-radius: 50%;
+    font-size: 3.5vh;
 }
 
 .mic-icon {
     border-radius: 50%;
+    font-size: 3.5vh;
 }
 
 .material-icons {
-    font-size: 40px;
+    font-size: 5vh;
+}
+
+.main {
+    height: 100vh;
+    display: flex;
+}
+
+.main__left {
+    flex: 0.78;
+    display: flex;
+    flex-direction: column;
+}
+
+.main__right {
+    border-radius: 1.2vh;
+    background-color: white;
+    flex: 0.22;
+    height: 91vh;
+    max-height: 91vh;
+    margin-top: 0.5vh;
+    margin-right: 0.5vh;
+}
+.main__header {
+    padding-top: 0.5vh;
+    text-align: center;
+    height: 4vh;
+}
+
+.main__chat_window {
+    overflow: auto;
+    max-height: 76vh;
+    height: 76vh;
+    max-width: 45vh;
+    width: 45vh;
+}
+
+.messages{
+    
+    list-style: none;
+}
+
+.main__message_container {
+    padding: 4vh 1vh;
+    position: static;
+    height: 3vh;
+}
+
+.main__message_container input {
+    width: 85%;
+    color: #F5F5F5;
+    margin-right: 1vh;
+    margin-left: 0.8vh;
+    float: left;
+}
+
+.main__message_container i {
+    font-size: 3.5vh;
+    margin-top: 77vh;
+    border: none;
 }

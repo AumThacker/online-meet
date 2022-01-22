@@ -29,6 +29,10 @@ io.on('connection', socket => {
         socket.join(meet_code)
         socket.broadcast.to(meet_code).emit('user-connected', userId)
 
+        socket.on('message', (message) => {
+            io.to(meet_code).emit('createMessage', message)
+        });
+
         socket.on('disconnect', () => {
             socket.broadcast.to(meet_code).emit('user-disconnected', userId)
         })
