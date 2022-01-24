@@ -25,7 +25,7 @@ navigator.mediaDevices.getUserMedia({
         setTimeout(connectToNewUser, 3000, userId, stream);
     })
     socket.on("createMessage", message => {
-        $("ul").append(`<li class="message"><b>user</b><br/>${message}</li>`);
+        $("ul").append(`<li class="message"><b>${message.name}</b><br/>${message.msg}</li>`);
     })
 })
 socket.on('user-disconnected', userId => {
@@ -47,10 +47,11 @@ function connectToNewUser(userId, stream) {
     })
     peers[userId] = call
 }
+
 function addVideoStream(video, stream) {
-    stream.getVideoTracks()[0].enabled = false;
-    stream.getAudioTracks()[0].enabled = false;
-    video.srcObject = myVideoStream
+    myVideoStream.getVideoTracks()[0].enabled = false;
+    myVideoStream.getAudioTracks()[0].enabled = false;
+    video.srcObject = stream
     video.addEventListener('loadedmetadata', () => {
         video.play()
     })
@@ -108,8 +109,10 @@ const turnOnVideo = () => {
 }
 
 const sendMessage = () => {
-    let message = document.getElementById('chat_message').value;
+    let message = {
+        name: name,
+        msg: document.getElementById('chat_message').value
+    };
     socket.emit('message', message);
     document.getElementById('chat_message').value = "";
-    
 }

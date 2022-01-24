@@ -10,6 +10,9 @@
     <script src="https://code.jquery.com/jquery-3.6.0.slim.js" integrity="sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY=" crossorigin="anonymous"></script>
     <script src="home.js"></script>
     <link rel="stylesheet" type="text/css" href="home.css">
+    <script>
+        const isLoggedin = "<%= isLoggedin %>";
+    </script>
     <title>Home</title>
 </head>
 
@@ -19,7 +22,17 @@
             <a class="navbar-brand" href="/">Online Meet</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
-          </button>
+            </button>
+            <% if(isLoggedin != true) { %>
+                <form class="d-flex" action="/login" method="get">
+                    <button class="btn btn-outline-primary" type="submit">Login</button>
+                </form>
+                <% } 
+            else{ %>
+                    <form class="d-flex" action="/logout" method="get">
+                        <button class="btn btn-outline-danger" type="submit">Logout</button>
+                    </form>
+                    <% } %>
         </div>
     </nav>
     <div class='title'>
@@ -27,16 +40,18 @@
         <h1>for everyone</h1>
         <p>Connect, collaborate and celebrate from anywhere with Online Meet</p>
         <br></br>
-        <div>
-            <form action="/meet" method="post">
-                <button class='btn btn-primary'>Start a meeting</button> &nbsp; or
-            </form>
-            <br>
-            <form id="join-meet-form" onsubmit="joinMeet()">
-                <input id="meet-code" type="text" class="form-control" placeholder='Enter a Code' style="width: 200px;" />
-                <button class='btn btn-secondary' type="submit">Join</button>
-            </form>
-        </div>
+        <% if(isLoggedin == true) { %>
+            <div>
+                <form action="/meet" method="post">
+                    <button class='btn btn-primary'>Start a meeting</button> &nbsp; or
+                </form>
+                <br>
+                <form id="join-meet-form" onsubmit="joinMeet()">
+                    <input id="meet-code" type="text" class="form-control" placeholder='Enter a Code' style="width: 200px;" />
+                    <button class='btn btn-secondary' type="submit">Join</button>
+                </form>
+            </div>
+            <% } %>
     </div>
     <div class='image'>
         <img src="Home.png" alt='Meet'></img>

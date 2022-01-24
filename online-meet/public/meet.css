@@ -67,6 +67,7 @@ video {
     margin-top: 0.5vh;
     margin-right: 0.5vh;
 }
+
 .main__header {
     padding-top: 0.5vh;
     text-align: center;
@@ -81,9 +82,8 @@ video {
     width: 45vh;
 }
 
-.messages{
-    
-    list-style: none;
+#messages {
+    list-style-type: none;
 }
 
 .main__message_container {

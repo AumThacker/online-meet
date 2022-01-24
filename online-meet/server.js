@@ -2,27 +2,52 @@ const express = require('express')
 const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
-const { v4: uuidV4 } = require('uuid')
-const { resourceLimits } = require('worker_threads')
+const passport = require('passport');
+const cookieSession = require('cookie-session')
+require("./passport-setup");
 
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
+app.use(cookieSession({
+    name: 'meet-session',
+    keys: ['key1', 'key2']
+}))
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.get('/', (req, res) => {
-    //let meet_code = Math.random().toString(36).slice(2);
-    //res.redirect(`/${meet_code}`)
-    res.render('home')
+    res.render('home', { isLoggedin: req.session.isLoggedin });
 })
-app.post('/meet',(req,res) => {
+
+app.get('/failed', (req, res) => res.send('Login failed'))
+
+app.get('/login', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+app.get('/login/callback', passport.authenticate('google', { failureRedirect: '/failed' }),
+    function(req, res) {
+        req.session.isLoggedin = true;
+        res.redirect('/');
+    });
+
+app.get('/logout', (req, res) => {
+    req.session.passport = null;
+    req.session.isLoggedin = false;
+    req.logOut();
+    res.redirect('/')
+})
+
+app.post('/meet', (req, res) => {
     let meet_code = Math.random().toString(36).slice(2);
     res.redirect(`/${meet_code}`)
 })
 
 app.get('/:meet', (req, res) => {
-    res.render('meet', { meet_code: req.params.meet })
+    if (req.session.isLoggedin) {
+        res.render('meet', { meet_code: req.params.meet, name: req.user.displayName })
+    } else {
+        res.redirect("/")
+    }
 })
-
-
 
 io.on('connection', socket => {
     socket.on('join-meet', (meet_code, userId) => {
