@@ -71,16 +71,18 @@ const micOnOff = () => {
 
 const turnOffMic = () => {
     const html = `
-    <i class="bi bi-mic-mute-fill"></i>
+        <i class='fas fa-microphone-slash'></i>
+        <span>Unmute</span>
     `
-    document.querySelector('.mic-icon').innerHTML = html;
+    document.querySelector('.mic-button').innerHTML = html;
 }
 
 const turnOnMic = () => {
     const html = `
-    <i class="bi bi-mic-fill"></i>
+        <i class='fas fa-microphone'></i>
+        <span>Mute</span>
     `
-    document.querySelector('.mic-icon').innerHTML = html;
+    document.querySelector('.mic-button').innerHTML = html;
 }
 
 const videoOnOff = () => {
@@ -96,16 +98,18 @@ const videoOnOff = () => {
 
 const turnOffVideo = () => {
     const html = `
-    <i class="bi bi-camera-video-off-fill"></i>
+        <i class="fas fa-video-slash"></i>
+        <span>Play video</span>
     `
-    document.querySelector('.video-icon').innerHTML = html;
+    document.querySelector('.video-button').innerHTML = html;
 }
 
 const turnOnVideo = () => {
     const html = `
-    <i class="bi bi-camera-video-fill"></i>
+        <i class="fas fa-video"></i>
+        <span>Stop video</span>
     `
-    document.querySelector('.video-icon').innerHTML = html;
+    document.querySelector('.video-button').innerHTML = html;
 }
 
 const sendMessage = () => {
@@ -113,6 +117,15 @@ const sendMessage = () => {
         name: name,
         msg: document.getElementById('chat_message').value
     };
+    // if (message.msg != "") {
     socket.emit('message', message);
     document.getElementById('chat_message').value = "";
+    // }
+}
+
+const leaveMeet = () => {
+    console.log("hello")
+    socket.emit("leave-meet");
+    let form = document.getElementById("leave-form");
+    form.action = `/leave/${meet_code}`;
 }

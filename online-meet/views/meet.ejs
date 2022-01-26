@@ -15,6 +15,7 @@
     <script src="meet.js" defer></script>
     <link rel="stylesheet" type="text/css" href="meet.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
     <script>
         const meet_code = "<%= meet_code %>"
         const name = "<%= name %>";
@@ -41,12 +42,20 @@
             </div>
         </div>
         <div class="bottom-nav">
-            <button class='mic-icon' onclick="micOnOff()">
-        <i class="bi bi-mic-mute-fill"></i>
-      </button>
-            <button class='video-icon' onclick="videoOnOff()">
-        <i class="bi bi-camera-video-off-fill"></i>
-      </button>
+            <div class="mic-button" onclick="micOnOff()">
+                <i class='fas fa-microphone-slash'></i>
+                <span>Unmute</span>
+            </div>
+            <div class="video-button" onclick="videoOnOff()">
+                <i class="fas fa-video-slash"></i>
+                <span>Play video</span>
+            </div>
+            <form id="leave-form">
+                <button class="leave-button" onclick="leaveMeet()">
+                    <i class="fas fa-phone"></i>
+                    <span>Leave meet</span>
+                </button>
+            </form>
         </div>
     </div>
 </body>
