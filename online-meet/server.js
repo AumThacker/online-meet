@@ -89,6 +89,11 @@ io.on('connection', socket => {
         socket.join(meet_code)
         socket.broadcast.to(meet_code).emit('user-connected', userId)
 
+        // socket.on('present-screen', () => {
+        //     console.log("hello1")
+        //     socket.broadcast.to(meet_code).emit('screen-presented')
+        // })
+
         socket.on('message', (message) => {
             io.to(meet_code).emit('createMessage', message)
         });

@@ -7,6 +7,9 @@ const myPeer = new Peer(undefined, {
 const myVideo = document.createElement('video')
 let myVideoStream;
 const peers = {}
+let calls = [];
+let screenStream;
+let isScreenPresented = false;
 navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true
@@ -14,6 +17,7 @@ navigator.mediaDevices.getUserMedia({
     myVideoStream = stream
     addVideoStream(myVideo, stream)
     myPeer.on('call', call => {
+        console.log(call)
         call.answer(stream)
         const video = document.createElement('video')
         call.on('stream', userVideoStream => {
@@ -24,11 +28,21 @@ navigator.mediaDevices.getUserMedia({
         // connectToNewUser(userId, stream)
         setTimeout(connectToNewUser, 3000, userId, stream);
     })
+
+    // socket.on('screen-presented', () => {
+
+    // })
+
     socket.on("createMessage", message => {
         $("ul").append(`<li class="message"><b>${message.name}</b><br/>${message.msg}</li>`);
     })
 })
 socket.on('user-disconnected', userId => {
+    for (let index = 0; index < calls.length; index++) {
+        if (peers[userId] == calls[index]) {
+            calls.splice(index, 1)
+        }
+    }
     if (peers[userId]) peers[userId].close()
 })
 
@@ -38,6 +52,7 @@ myPeer.on('open', id => {
 
 function connectToNewUser(userId, stream) {
     const call = myPeer.call(userId, stream)
+    console.log(call)
     const video = document.createElement('video')
     call.on('stream', userVideoStream => {
         addVideoStream(video, userVideoStream)
@@ -46,6 +61,7 @@ function connectToNewUser(userId, stream) {
         video.remove()
     })
     peers[userId] = call
+    calls.push(call)
 }
 
 function addVideoStream(video, stream) {
@@ -56,6 +72,61 @@ function addVideoStream(video, stream) {
         video.play()
     })
     videoGrid.append(video);
+}
+
+const shareScreen = () => {
+    navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
+        const html = `
+        <span class="material-icons" id="stop-presenting-icon">
+            cancel_presentation
+        </span>
+        <span>Stop presenting</span>
+        `
+        document.querySelector('.present-screen-button').innerHTML = html;
+        document.getElementsByClassName('present-screen-button')[0].setAttribute('onclick', "stopScreenSharing()")
+        screenStream = stream;
+//        socket.emit('present-screen')
+        document.getElementsByTagName('video')[0].srcObject = stream
+        isScreenPresented = true;
+        let videoTrack = screenStream.getVideoTracks()[0];
+        videoTrack.onended = () => {
+            stopScreenSharing()
+        }
+        if (myPeer) {
+            calls.forEach(call => {
+                call.peerConnection.getSenders().find(function (s) {
+                    if (s.track.kind == videoTrack.kind) {
+                        s.replaceTrack(videoTrack)
+                    }
+                })
+            });
+        }
+    })
+}
+const stopScreenSharing = () => {
+    const html = `
+    <span class="material-icons" id="present-screen-icon">
+    present_to_all
+</span>
+<span>Present screen</span>
+    `
+    document.querySelector('.present-screen-button').innerHTML = html;
+    document.getElementsByClassName('present-screen-button')[0].setAttribute('onclick', "shareScreen()")
+    document.getElementsByTagName('video')[0].srcObject = myVideoStream
+    let videoTrack = myVideoStream.getVideoTracks()[0];
+    isScreenPresented = false;
+    if (myPeer) {
+        calls.forEach(call => {
+            call.peerConnection.getSenders().find(function (s) {
+                if (s.track.kind == videoTrack.kind) {
+                    s.replaceTrack(videoTrack)
+                }
+            })
+        });
+    }
+    screenStream.getTracks().forEach(function (track) {
+        track.stop();
+    });
 }
 
 const micOnOff = () => {
@@ -71,15 +142,19 @@ const micOnOff = () => {
 
 const turnOffMic = () => {
     const html = `
-        <i class='fas fa-microphone-slash'></i>
-        <span>Unmute</span>
+    <span class="material-icons" id="mic-off" >
+        mic_off
+    </span>
+    <span>Unmute</span>
     `
     document.querySelector('.mic-button').innerHTML = html;
 }
 
 const turnOnMic = () => {
     const html = `
-        <i class='fas fa-microphone'></i>
+    <span class="material-icons" id="mic">
+    mic
+    </span>
         <span>Mute</span>
     `
     document.querySelector('.mic-button').innerHTML = html;
@@ -98,7 +173,9 @@ const videoOnOff = () => {
 
 const turnOffVideo = () => {
     const html = `
-        <i class="fas fa-video-slash"></i>
+    <span class="material-icons" id="videocam-off">
+    videocam_off
+    </span>
         <span>Play video</span>
     `
     document.querySelector('.video-button').innerHTML = html;
@@ -106,7 +183,9 @@ const turnOffVideo = () => {
 
 const turnOnVideo = () => {
     const html = `
-        <i class="fas fa-video"></i>
+    <span class="material-icons" id = "videocam">
+    videocam
+    </span>
         <span>Stop video</span>
     `
     document.querySelector('.video-button').innerHTML = html;
@@ -117,14 +196,13 @@ const sendMessage = () => {
         name: name,
         msg: document.getElementById('chat_message').value
     };
-    // if (message.msg != "") {
-    socket.emit('message', message);
-    document.getElementById('chat_message').value = "";
-    // }
+    if (message.msg != "") {
+        socket.emit('message', message);
+        document.getElementById('chat_message').value = "";
+    }
 }
 
 const leaveMeet = () => {
-    console.log("hello")
     socket.emit("leave-meet");
     let form = document.getElementById("leave-form");
     form.action = `/leave/${meet_code}`;
