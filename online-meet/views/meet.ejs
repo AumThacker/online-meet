@@ -22,7 +22,9 @@
     <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
     <script>
         const meet_code = "<%= meet_code %>"
-        const name = "<%= name %>";
+        const name = "<%= name %>"
+        const email = "<%= email %>";
+        const profile_img = "<%= profile_img %>"
     </script>
 </head>
 
@@ -33,7 +35,7 @@
                 <div id="video-grid"></div>
             </div>
         </div>
-        <div class="main__right">
+        <div class="main__right" id="chat">
             <div class="main__header">
                 <h5>Chat</h5>
             </div>
@@ -45,15 +47,24 @@
                 <i onclick="sendMessage()" class="bi bi-send"></i>
             </div>
         </div>
+        <div class="main__right" id="view_people">
+            <div class="main__header">
+                <h5>View People</h5>
+            </div>
+            <div class="main__people_window">
+                <ul id="people_list"></ul>
+            </div>
+        </div>
         <div class="bottom-nav">
-            <div class="mic-button"  onclick="micOnOff()">
+
+            <div class="mic-button" onclick="micOnOff()">
                 <span class="material-icons" id="mic-off">
                     mic_off
                 </span>
                 <span>Unmute</span>
             </div>
-            <div class="video-button" onclick="videoOnOff()" >
-                <span class="material-icons" id = "videocam-off">
+            <div class="video-button" onclick="videoOnOff()">
+                <span class="material-icons" id="videocam-off">
                     videocam_off
                 </span>
                 <span>Play video</span>
@@ -63,6 +74,18 @@
                     present_to_all
                 </span>
                 <span>Present screen</span>
+            </div>
+            <div class="chat-button" onclick="chat()">
+                <span class="material-icons" id="chat-icon">
+                    chat
+                </span>
+                <span>Chat</span>
+            </div>
+            <div class="view-people-button" onclick="viewPeople()">
+                <span class="material-icons" id="view-people-icon">
+                    people
+                </span>
+                <span>View People</span>
             </div>
             <form id="leave-form">
                 <button class="leave-button" onclick="leaveMeet()">

@@ -10,6 +10,7 @@ const peers = {}
 let calls = [];
 let screenStream;
 let isScreenPresented = false;
+document.getElementById("view_people").style.display = "none";
 navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true
@@ -17,7 +18,6 @@ navigator.mediaDevices.getUserMedia({
     myVideoStream = stream
     addVideoStream(myVideo, stream)
     myPeer.on('call', call => {
-        console.log(call)
         call.answer(stream)
         const video = document.createElement('video')
         call.on('stream', userVideoStream => {
@@ -34,7 +34,19 @@ navigator.mediaDevices.getUserMedia({
     // })
 
     socket.on("createMessage", message => {
-        $("ul").append(`<li class="message"><b>${message.name}</b><br/>${message.msg}</li>`);
+        $("#messages").append(`<li class="message"><b>${message.name}</b><br/>${message.msg}</li>`);
+    })
+
+    socket.on("people-list", (people, current_user_email) => {
+        if (current_user_email == email)
+        {
+            for (let i = 0; i < people.length; i++) {
+                for(let j=1; j<people[i].length;j++)
+                {
+                    $("#people_list").append(`<img src="${people[i][0]}"></img><li class="message">${people[i][j]}</li><br>`);
+                }
+            }
+        }
     })
 })
 socket.on('user-disconnected', userId => {
@@ -47,12 +59,11 @@ socket.on('user-disconnected', userId => {
 })
 
 myPeer.on('open', id => {
-    socket.emit('join-meet', meet_code, id)
+    socket.emit('join-meet', meet_code, id, name, email, profile_img)
 })
 
 function connectToNewUser(userId, stream) {
     const call = myPeer.call(userId, stream)
-    console.log(call)
     const video = document.createElement('video')
     call.on('stream', userVideoStream => {
         addVideoStream(video, userVideoStream)
@@ -85,7 +96,7 @@ const shareScreen = () => {
         document.querySelector('.present-screen-button').innerHTML = html;
         document.getElementsByClassName('present-screen-button')[0].setAttribute('onclick', "stopScreenSharing()")
         screenStream = stream;
-//        socket.emit('present-screen')
+        //        socket.emit('present-screen')
         document.getElementsByTagName('video')[0].srcObject = stream
         isScreenPresented = true;
         let videoTrack = screenStream.getVideoTracks()[0];
@@ -202,8 +213,20 @@ const sendMessage = () => {
     }
 }
 
+const chat = () => {
+    document.getElementById("view_people").style.display = "none";
+    document.getElementById("chat").style.display = "inline";
+}
+
+const viewPeople = () => {
+    document.getElementById("chat").style.display = "none";
+    document.getElementById("view_people").style.display = "inline";
+    document.getElementById("people_list").innerHTML = "";
+    socket.emit("view-people", email);
+}
+
 const leaveMeet = () => {
-    socket.emit("leave-meet");
+    socket.emit("leave-meet", name, email);
     let form = document.getElementById("leave-form");
     form.action = `/leave/${meet_code}`;
 }

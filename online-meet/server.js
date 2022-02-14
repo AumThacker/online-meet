@@ -7,7 +7,7 @@ const cookieSession = require('cookie-session')
 const mongoose = require("mongoose");
 const Meet = require("./models/Meet");
 require("./passport-setup");
-
+let people = new Map();
 mongoose.connect("mongodb://localhost:27017/meet_db");
 
 app.set('view engine', 'ejs')
@@ -33,6 +33,7 @@ app.get('/login', passport.authenticate('google', { scope: ['profile', 'email'] 
 app.get('/login/callback', passport.authenticate('google', { failureRedirect: '/failed' }),
     function(req, res) {
         req.session.isLoggedin = true;
+        console.log(req.user.photos[0].value);
         res.redirect('/');
     });
 
@@ -57,6 +58,9 @@ app.post('/meet', async(req, res) => {
         host_lname: req.user.name.familyName
     });
     createMeet(meet);
+
+    people.set(meet_code, new Map());
+    
     res.redirect(`/${meet_code}`)
 })
 
@@ -74,7 +78,7 @@ app.post('/join-meet', async(req, res) => {
 
 app.get('/:meet', (req, res) => {
     if (req.session.isLoggedin) {
-        res.render('meet', { meet_code: req.params.meet, name: req.user.displayName })
+        res.render('meet', { meet_code: req.params.meet, name: req.user.displayName, email: req.user.emails[0].value, profile_img: req.user.photos[0].value })
     } else {
         res.redirect("/")
     }
@@ -85,12 +89,17 @@ app.get('/leave/:meet', (req, res) => {
 })
 
 io.on('connection', socket => {
-    socket.on('join-meet', (meet_code, userId) => {
+    
+    socket.on('join-meet', (meet_code, userId, name, email, profile_img) => {
+        if(!people.get(meet_code).has(email))
+        {
+            people.get(meet_code).set(email, [profile_img]);
+        }
+        people.get(meet_code).get(email).push(name);
         socket.join(meet_code)
         socket.broadcast.to(meet_code).emit('user-connected', userId)
 
         // socket.on('present-screen', () => {
-        //     console.log("hello1")
         //     socket.broadcast.to(meet_code).emit('screen-presented')
         // })
 
@@ -98,13 +107,38 @@ io.on('connection', socket => {
             io.to(meet_code).emit('createMessage', message)
         });
 
-        socket.on('leave-meet', () => {
+        socket.on('view-people', (current_user_email) => {
+            let people_map = people.get(meet_code);
+            let people_list = [people_map.size];
+            for (let i = 0; i < people_map.size; i++) {
+                people_list[i] = []   
+            }
+            let i = 0;
+            people_map.forEach(function(value, key){
+                value.forEach(element => {
+                    people_list[i].push(element);
+                });
+                i++;
+            });
+
+            io.to(meet_code).emit('people-list', people_list, current_user_email);
+        })
+
+        socket.on('leave-meet', (name, email) => {
+            for (let i = 0; i < people.get(meet_code).get(email).length; i++) {
+                if(people.get(meet_code).get(email)[i]==name )
+                {
+                    people.get(meet_code).get(email).splice(i,1);
+                    break;
+                }
+            }
             socket.broadcast.to(meet_code).emit('user-disconnected', userId)
         })
 
         socket.on('disconnect', () => {
             socket.broadcast.to(meet_code).emit('user-disconnected', userId)
         })
+        
     })
 })
 

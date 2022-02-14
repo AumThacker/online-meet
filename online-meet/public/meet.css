@@ -55,6 +55,24 @@ video {
     align-items: center;
     cursor: pointer;
 }
+.chat-button {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.5%;
+    margin-right: 0.5%;
+    margin-bottom: 0.5%;
+    align-items: center;
+    cursor: pointer;
+}
+.view-people-button {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.5%;
+    margin-right: 0.5%;
+    margin-bottom: 0.5%;
+    align-items: center;
+    cursor: pointer;
+}
 #videocam-off {
     color: rgb(255, 56, 56);
 }
@@ -73,8 +91,20 @@ video {
 #present-screen-icon {
     color: #d8d1d1;
 }
+#chat-icon {
+    color: #d8d1d1;
+}
+#view-people-icon {
+    color: #d8d1d1;
+}
 
 .present-screen-button span {
+    color: #d8d1d1;
+}
+.chat-button span {
+    color: #d8d1d1;
+}
+.view-people-button span {
     color: #d8d1d1;
 }
 
@@ -103,7 +133,6 @@ video {
 
 #leave-form {
     margin-top: 0.5%;
-    margin-right: 1%;
     margin-bottom: 0.5%;
 }
 
@@ -114,6 +143,7 @@ video {
     cursor: pointer;
     background-color: #111120;
     border: none;
+    
 }
 
 #call-end {
@@ -171,6 +201,16 @@ video {
     flex-direction: column-reverse;
 }
 
+.main__people_window {
+    overflow: auto;
+    max-height: 80vh;
+    height: 80vh;
+    max-width: 45vh;
+    width: 45vh;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
 #messages {
     list-style-type: none;
     padding-left: 2.2vh;
@@ -199,4 +239,22 @@ video {
     font-size: 3.5vh;
     margin-top: 77vh;
     border: none;
+}
+
+#people_list{
+    list-style-type: none;
+    padding-left: 2.2vh;
+}
+
+#people_list li{
+    display: inline;
+    margin-bottom: 0.5vh;
+    font-size: large;
+}
+
+#people_list img{
+    margin-bottom: 1vh;
+    margin-right: 1vh;
+    height: 6vh;
+    width: 6vh;
 }
