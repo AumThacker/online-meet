@@ -33,7 +33,6 @@ app.get('/login', passport.authenticate('google', { scope: ['profile', 'email'] 
 app.get('/login/callback', passport.authenticate('google', { failureRedirect: '/failed' }),
     function(req, res) {
         req.session.isLoggedin = true;
-        console.log(req.user.photos[0].value);
         res.redirect('/');
     });
 
@@ -60,7 +59,7 @@ app.post('/meet', async(req, res) => {
     createMeet(meet);
 
     people.set(meet_code, new Map());
-    
+
     res.redirect(`/${meet_code}`)
 })
 
@@ -76,9 +75,10 @@ app.post('/join-meet', async(req, res) => {
     }
 });
 
-app.get('/:meet', (req, res) => {
+app.get('/:meet', async(req, res) => {
     if (req.session.isLoggedin) {
-        res.render('meet', { meet_code: req.params.meet, name: req.user.displayName, email: req.user.emails[0].value, profile_img: req.user.photos[0].value })
+        let host_email = await findMeetHost(req.params.meet);
+        res.render('meet', { meet_code: req.params.meet, name: req.user.displayName, email: req.user.emails[0].value, profile_img: req.user.photos[0].value, host_email: host_email })
     } else {
         res.redirect("/")
     }
@@ -89,10 +89,8 @@ app.get('/leave/:meet', (req, res) => {
 })
 
 io.on('connection', socket => {
-    
     socket.on('join-meet', (meet_code, userId, name, email, profile_img) => {
-        if(!people.get(meet_code).has(email))
-        {
+        if (!people.get(meet_code).has(email)) {
             people.get(meet_code).set(email, [profile_img]);
         }
         people.get(meet_code).get(email).push(name);
@@ -107,14 +105,30 @@ io.on('connection', socket => {
             io.to(meet_code).emit('createMessage', message)
         });
 
+        socket.on('request', (email, name, profile_img) => {
+            io.to(meet_code).emit('show-request', email, name, profile_img);
+        })
+
+        socket.on('remove-request', (email) => {
+            io.to(meet_code).emit('request-removed', email);
+        })
+
+        socket.on('do-authorization', (email, is_authorized_user) => {
+            if (is_authorized_user) {
+                io.to(meet_code).emit('authorized', email);
+            } else {
+                io.to(meet_code).emit('not-authorized', email);
+            }
+        })
+
         socket.on('view-people', (current_user_email) => {
             let people_map = people.get(meet_code);
             let people_list = [people_map.size];
             for (let i = 0; i < people_map.size; i++) {
-                people_list[i] = []   
+                people_list[i] = []
             }
             let i = 0;
-            people_map.forEach(function(value, key){
+            people_map.forEach(function(value, key) {
                 value.forEach(element => {
                     people_list[i].push(element);
                 });
@@ -126,9 +140,8 @@ io.on('connection', socket => {
 
         socket.on('leave-meet', (name, email) => {
             for (let i = 0; i < people.get(meet_code).get(email).length; i++) {
-                if(people.get(meet_code).get(email)[i]==name )
-                {
-                    people.get(meet_code).get(email).splice(i,1);
+                if (people.get(meet_code).get(email)[i] == name) {
+                    people.get(meet_code).get(email).splice(i, 1);
                     break;
                 }
             }
@@ -138,7 +151,6 @@ io.on('connection', socket => {
         socket.on('disconnect', () => {
             socket.broadcast.to(meet_code).emit('user-disconnected', userId)
         })
-        
     })
 })
 
@@ -148,6 +160,14 @@ async function findMeet(meet_code) {
         return true;
     }
     return false;
+}
+
+async function findMeetHost(meet_code) {
+    const meet = await Meet.findOne({ meet_code: meet_code });
+    if (meet != null) {
+        return meet.host_email;
+    }
+    return "";
 }
 
 async function createMeet(meet) {

@@ -10,7 +10,59 @@ const peers = {}
 let calls = [];
 let screenStream;
 let isScreenPresented = false;
-document.getElementById("view_people").style.display = "none";
+
+$("#view_people").hide();
+$("#view_requests").hide();
+$(".main").hide();
+$(".request_main_page").show();
+
+socket.on('show-request', (requesting_user_email, requesting_user_name, requesting_user_profile_img) => {
+    if (email == host_email) {
+        document.getElementsByClassName("view-requests-button")[0].click();
+        const html = `
+            <img id="${requesting_user_email}" src='${requesting_user_profile_img}'></img>
+            <li id="${requesting_user_email}">${requesting_user_name}
+                <button class="btn btn-outline-primary" onclick="join('${requesting_user_email}')">Join</button>
+                <button class="btn btn-outline-danger" onclick="cancel('${requesting_user_email}')">Cancel</button>
+            </li>
+        `
+        $("#request_list").append(html);
+    }
+})
+
+socket.on('not-authorized', (not_authorized_email) => {
+    if (email == not_authorized_email) {
+        $(".main").hide();
+        $(".request_main_page").show();
+        document.getElementsByClassName("leave-button")[0].click();
+    }
+    if (email == host_email) {
+        while (!!document.getElementById(`${not_authorized_email}`)) {
+            document.getElementById(`${not_authorized_email}`).remove();
+        }
+    }
+})
+
+socket.on('authorized', (authorized_email) => {
+    if (email == authorized_email) {
+        $(".main").show();
+        $(".request_main_page").hide();
+    }
+    if (email == host_email) {
+        while (!!document.getElementById(`${authorized_email}`)) {
+            document.getElementById(`${authorized_email}`).remove();
+        }
+    }
+})
+
+socket.on('request-removed', (requested_email) => {
+    if (email == host_email) {
+        if (!!document.getElementById(`${requested_email}`)) {
+            document.getElementById(`${requested_email}`).remove();
+        }
+    }
+})
+
 navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true
@@ -38,17 +90,16 @@ navigator.mediaDevices.getUserMedia({
     })
 
     socket.on("people-list", (people, current_user_email) => {
-        if (current_user_email == email)
-        {
+        if (current_user_email == email) {
             for (let i = 0; i < people.length; i++) {
-                for(let j=1; j<people[i].length;j++)
-                {
+                for (let j = 1; j < people[i].length; j++) {
                     $("#people_list").append(`<img src="${people[i][0]}"></img><li class="message">${people[i][j]}</li><br>`);
                 }
             }
         }
     })
 })
+
 socket.on('user-disconnected', userId => {
     for (let index = 0; index < calls.length; index++) {
         if (peers[userId] == calls[index]) {
@@ -56,10 +107,6 @@ socket.on('user-disconnected', userId => {
         }
     }
     if (peers[userId]) peers[userId].close()
-})
-
-myPeer.on('open', id => {
-    socket.emit('join-meet', meet_code, id, name, email, profile_img)
 })
 
 function connectToNewUser(userId, stream) {
@@ -85,6 +132,16 @@ function addVideoStream(video, stream) {
     videoGrid.append(video);
 }
 
+myPeer.on('open', id => {
+    socket.emit('join-meet', meet_code, id, name, email, profile_img)
+    if (email != host_email) {
+        socket.emit('request', email, name, profile_img);
+    }
+    if (email == host_email) {
+        socket.emit('do-authorization', host_email, true);
+    }
+})
+
 const shareScreen = () => {
     navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
         const html = `
@@ -105,7 +162,7 @@ const shareScreen = () => {
         }
         if (myPeer) {
             calls.forEach(call => {
-                call.peerConnection.getSenders().find(function (s) {
+                call.peerConnection.getSenders().find(function(s) {
                     if (s.track.kind == videoTrack.kind) {
                         s.replaceTrack(videoTrack)
                     }
@@ -117,9 +174,9 @@ const shareScreen = () => {
 const stopScreenSharing = () => {
     const html = `
     <span class="material-icons" id="present-screen-icon">
-    present_to_all
-</span>
-<span>Present screen</span>
+        present_to_all
+    </span>
+    <span>Present screen</span>
     `
     document.querySelector('.present-screen-button').innerHTML = html;
     document.getElementsByClassName('present-screen-button')[0].setAttribute('onclick', "shareScreen()")
@@ -128,14 +185,14 @@ const stopScreenSharing = () => {
     isScreenPresented = false;
     if (myPeer) {
         calls.forEach(call => {
-            call.peerConnection.getSenders().find(function (s) {
+            call.peerConnection.getSenders().find(function(s) {
                 if (s.track.kind == videoTrack.kind) {
                     s.replaceTrack(videoTrack)
                 }
             })
         });
     }
-    screenStream.getTracks().forEach(function (track) {
+    screenStream.getTracks().forEach(function(track) {
         track.stop();
     });
 }
@@ -214,19 +271,40 @@ const sendMessage = () => {
 }
 
 const chat = () => {
-    document.getElementById("view_people").style.display = "none";
-    document.getElementById("chat").style.display = "inline";
+    $("#view_people").hide();
+    $("#view_requests").hide();
+    $("#chat").show();
 }
 
 const viewPeople = () => {
-    document.getElementById("chat").style.display = "none";
-    document.getElementById("view_people").style.display = "inline";
+    $("#view_people").show();
+    $("#view_requests").hide();
+    $("#chat").hide();
     document.getElementById("people_list").innerHTML = "";
     socket.emit("view-people", email);
 }
 
+const viewRequests = () => {
+    $("#view_people").hide();
+    $("#chat").hide();
+    $("#view_requests").show();
+}
+
+const join = (requesting_user_email) => {
+    socket.emit('do-authorization', requesting_user_email, true);
+}
+
+const cancel = (requesting_user_email) => {
+    socket.emit('do-authorization', requesting_user_email, false);
+}
+
+const leaveMeetFromRequest = () => {
+    socket.emit("leave-meet", name, email);
+    socket.emit("remove-request", email);
+    document.getElementById("leave-form-from-request").action = `/leave/${meet_code}`;
+}
+
 const leaveMeet = () => {
     socket.emit("leave-meet", name, email);
-    let form = document.getElementById("leave-form");
-    form.action = `/leave/${meet_code}`;
+    document.getElementById("leave-form").action = `/leave/${meet_code}`;
 }

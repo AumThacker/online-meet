@@ -1,8 +1,13 @@
-body {
-    background-color: #2F303A;
+.request_main_page {
+    text-align: center;
+    margin-top: 10vh;
 }
 
-#present_screen{
+.text {
+    font-size: xx-large;
+}
+
+#present_screen {
     width: 165vh;
     height: 50vh;
     /* transform: rotateY(180deg);
@@ -46,6 +51,7 @@ video {
     align-items: center;
     cursor: pointer;
 }
+
 .present-screen-button {
     display: flex;
     flex-direction: column;
@@ -55,6 +61,7 @@ video {
     align-items: center;
     cursor: pointer;
 }
+
 .chat-button {
     display: flex;
     flex-direction: column;
@@ -64,6 +71,7 @@ video {
     align-items: center;
     cursor: pointer;
 }
+
 .view-people-button {
     display: flex;
     flex-direction: column;
@@ -73,6 +81,17 @@ video {
     align-items: center;
     cursor: pointer;
 }
+
+.view-requests-button {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.5%;
+    margin-right: 0.5%;
+    margin-bottom: 0.5%;
+    align-items: center;
+    cursor: pointer;
+}
+
 #videocam-off {
     color: rgb(255, 56, 56);
 }
@@ -88,26 +107,38 @@ video {
 #stop-presenting-icon {
     color: rgb(255, 56, 56);
 }
+
 #present-screen-icon {
     color: #d8d1d1;
 }
+
 #chat-icon {
     color: #d8d1d1;
 }
+
 #view-people-icon {
+    color: #d8d1d1;
+}
+
+#view-requests-icon {
     color: #d8d1d1;
 }
 
 .present-screen-button span {
     color: #d8d1d1;
 }
+
 .chat-button span {
     color: #d8d1d1;
 }
+
 .view-people-button span {
     color: #d8d1d1;
 }
 
+.view-requests-button span {
+    color: #d8d1d1;
+}
 
 .mic-button {
     display: flex;
@@ -143,7 +174,6 @@ video {
     cursor: pointer;
     background-color: #111120;
     border: none;
-    
 }
 
 #call-end {
@@ -167,6 +197,7 @@ video {
 .main {
     height: 100vh;
     display: flex;
+    background-color: #2F303A;
 }
 
 .main__left {
@@ -211,12 +242,22 @@ video {
     flex-direction: column-reverse;
 }
 
+.view_requests_window {
+    overflow: auto;
+    max-height: 80vh;
+    height: 80vh;
+    max-width: 45vh;
+    width: 45vh;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
 #messages {
     list-style-type: none;
     padding-left: 2.2vh;
 }
 
-#messages li{
+#messages li {
     word-wrap: break-word;
 }
 
@@ -241,20 +282,36 @@ video {
     border: none;
 }
 
-#people_list{
+#people_list {
     list-style-type: none;
     padding-left: 2.2vh;
 }
 
-#people_list li{
+#people_list li {
     display: inline;
     margin-bottom: 0.5vh;
     font-size: large;
 }
 
-#people_list img{
+#people_list img {
     margin-bottom: 1vh;
     margin-right: 1vh;
+    height: 6vh;
+    width: 6vh;
+}
+
+#request_list {
+    list-style-type: none;
+    padding-left: 2.2vh;
+}
+
+#request_list li {
+    display: inline;
+    margin-bottom: 0.5vh;
+}
+
+#request_list img {
+    margin-bottom: 0.5vh;
     height: 6vh;
     width: 6vh;
 }
