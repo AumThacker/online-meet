@@ -81,7 +81,15 @@ video {
     align-items: center;
     cursor: pointer;
 }
-
+.add-people-button {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.5%;
+    margin-right: 0.5%;
+    margin-bottom: 0.5%;
+    align-items: center;
+    cursor: pointer;
+}
 .view-requests-button {
     display: flex;
     flex-direction: column;
@@ -120,6 +128,10 @@ video {
     color: #d8d1d1;
 }
 
+#add-people-icon {
+    color: #d8d1d1;
+}
+
 #view-requests-icon {
     color: #d8d1d1;
 }
@@ -133,6 +145,10 @@ video {
 }
 
 .view-people-button span {
+    color: #d8d1d1;
+}
+
+.add-people-button span {
     color: #d8d1d1;
 }
 
@@ -234,12 +250,18 @@ video {
 
 .main__people_window {
     overflow: auto;
-    max-height: 80vh;
-    height: 80vh;
+    max-height: 83vh;
+    height: 83vh;
     max-width: 45vh;
     width: 45vh;
     display: flex;
     flex-direction: column-reverse;
+}
+
+#attendance_btn{
+    margin-left: 2vh;
+    margin-right: 2vh;
+    width: 42vh;
 }
 
 .view_requests_window {

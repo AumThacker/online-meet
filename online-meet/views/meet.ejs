@@ -26,6 +26,23 @@
 </head>
 
 <body>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Add Person</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <input type="text" class="form-control" placeholder="Enter email">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
     <div class="request_main_page">
         <label class="text">You will join the call when someone lets you in.</label>
         <form id="leave-form-from-request">
@@ -91,12 +108,19 @@
                 </span>
                 <span>Chat</span>
             </div>
-            <div class="view-people-button" onclick="viewPeople()">
+            <div class="view-people-button" id="view-people-button-id" onclick="viewPeople()">
                 <span class="material-icons" id="view-people-icon">
                     people
                 </span>
                 <span>View People</span>
             </div>
+            <div class="add-people-button" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <span class="material-icons" id="add-people-icon">
+                    person_add
+                </span>
+                <span>Add People</span>
+            </div>
+            
             <div class="view-requests-button" onclick="viewRequests()">
                 <span class="material-icons" id="view-requests-icon">
                     input

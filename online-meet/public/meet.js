@@ -10,6 +10,7 @@ const peers = {}
 let calls = [];
 let screenStream;
 let isScreenPresented = false;
+let people_list;
 
 $("#view_people").hide();
 $("#view_requests").hide();
@@ -91,6 +92,7 @@ navigator.mediaDevices.getUserMedia({
 
     socket.on("people-list", (people, current_user_email) => {
         if (current_user_email == email) {
+            people_list = people;
             for (let i = 0; i < people.length; i++) {
                 for (let j = 1; j < people[i].length; j++) {
                     $("#people_list").append(`<img src="${people[i][0]}"></img><li class="message">${people[i][j]}</li><br>`);
@@ -162,7 +164,7 @@ const shareScreen = () => {
         }
         if (myPeer) {
             calls.forEach(call => {
-                call.peerConnection.getSenders().find(function(s) {
+                call.peerConnection.getSenders().find(function (s) {
                     if (s.track.kind == videoTrack.kind) {
                         s.replaceTrack(videoTrack)
                     }
@@ -185,14 +187,14 @@ const stopScreenSharing = () => {
     isScreenPresented = false;
     if (myPeer) {
         calls.forEach(call => {
-            call.peerConnection.getSenders().find(function(s) {
+            call.peerConnection.getSenders().find(function (s) {
                 if (s.track.kind == videoTrack.kind) {
                     s.replaceTrack(videoTrack)
                 }
             })
         });
     }
-    screenStream.getTracks().forEach(function(track) {
+    screenStream.getTracks().forEach(function (track) {
         track.stop();
     });
 }
@@ -281,6 +283,13 @@ const viewPeople = () => {
     $("#view_requests").hide();
     $("#chat").hide();
     document.getElementById("people_list").innerHTML = "";
+    if (email == host_email) {
+        document.getElementsByClassName("main__people_window")[0].style.height = "76vh";
+        document.getElementsByClassName("main__people_window")[0].style.maxHeight = "76vh";
+        if (!!document.getElementById("attendance_btn") == false) {
+            $("#view_people").append('<button class="btn btn-outline-primary" id="attendance_btn" onclick="takeAttendance()">Take Attendance</button>')
+        }
+    }
     socket.emit("view-people", email);
 }
 
@@ -296,6 +305,17 @@ const join = (requesting_user_email) => {
 
 const cancel = (requesting_user_email) => {
     socket.emit('do-authorization', requesting_user_email, false);
+}
+
+const takeAttendance = () => {
+    let people = $("#people_list").html();
+    let printWindow = window.open('', '', 'height=600,width=1000');
+    printWindow.document.write('<html><head><title>People List</title>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(people);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
 }
 
 const leaveMeetFromRequest = () => {
