@@ -16,6 +16,8 @@ $("#view_people").hide();
 $("#view_requests").hide();
 $(".main").hide();
 $(".request_main_page").show();
+$("#add-person-suc-msg").hide();
+$("#add-person-fail-msg").hide();
 
 socket.on('show-request', (requesting_user_email, requesting_user_name, requesting_user_profile_img) => {
     if (email == host_email) {
@@ -62,6 +64,14 @@ socket.on('request-removed', (requested_email) => {
             document.getElementById(`${requested_email}`).remove();
         }
     }
+})
+
+socket.on('person-authorized', () => {
+    $("#email").val("");
+    $("#add-person-suc-msg").show();
+    setTimeout(() => {
+        $("#add-person-suc-msg").hide();
+    }, 3000);
 })
 
 navigator.mediaDevices.getUserMedia({
@@ -291,6 +301,20 @@ const viewPeople = () => {
         }
     }
     socket.emit("view-people", email);
+}
+
+const authorizePerson = () => {
+    if($("#email").val() != "")
+    {
+        socket.emit("authorize-person", $("#email").val(), host_email, host_name);
+    }
+    else
+    {
+        $("#add-person-fail-msg").show();
+        setTimeout(() => {
+            $("#add-person-fail-msg").hide();
+        }, 3000);
+    }
 }
 
 const viewRequests = () => {

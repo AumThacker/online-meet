@@ -6,8 +6,19 @@ const passport = require('passport');
 const cookieSession = require('cookie-session')
 const mongoose = require("mongoose");
 const Meet = require("./models/Meet");
+const nodemailer = require('nodemailer');
 require("./passport-setup");
+
 let people = new Map();
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'onlinemeet157@gmail.com',
+        pass: 'Online@123'
+    }
+})
+
+
 mongoose.connect("mongodb://localhost:27017/meet_db");
 
 app.set('view engine', 'ejs')
@@ -77,8 +88,8 @@ app.post('/join-meet', async(req, res) => {
 
 app.get('/:meet', async(req, res) => {
     if (req.session.isLoggedin) {
-        let host_email = await findMeetHost(req.params.meet);
-        res.render('meet', { meet_code: req.params.meet, name: req.user.displayName, email: req.user.emails[0].value, profile_img: req.user.photos[0].value, host_email: host_email })
+        let meet = await findMeetHost(req.params.meet);
+        res.render('meet', { meet_code: req.params.meet, name: req.user.displayName, email: req.user.emails[0].value, profile_img: req.user.photos[0].value, host_email: meet.host_email, host_name: meet.host_fname + " " + meet.host_lname })
     } else {
         res.redirect("/")
     }
@@ -105,8 +116,16 @@ io.on('connection', socket => {
             io.to(meet_code).emit('createMessage', message)
         });
 
-        socket.on('request', (email, name, profile_img) => {
-            io.to(meet_code).emit('show-request', email, name, profile_img);
+        socket.on('request', async (email, name, profile_img) => {
+            let is_authorized_email = await isAuthorizedEmail(meet_code, email);
+            if(is_authorized_email == true)
+            {
+                io.to(meet_code).emit('authorized', email);
+            }
+            else
+            {
+                io.to(meet_code).emit('show-request', email, name, profile_img);
+            }
         })
 
         socket.on('remove-request', (email) => {
@@ -138,6 +157,23 @@ io.on('connection', socket => {
             io.to(meet_code).emit('people-list', people_list, current_user_email);
         })
 
+        socket.on('authorize-person', async (email, host_email, host_name) => {
+            await addAuthorizedEmail(meet_code, email);
+            let mailOptions = {
+                from: 'onlinemeet157@gmail.com',
+                to: email,
+                subject: 'Online Meet Invitation',
+                text: `You are invited to ${host_name}'s meet.
+Here is meet details:
+    Host name: ${host_name}
+    Host email: ${host_email}
+    Meet code: ${meet_code}
+                `
+            }
+            transporter.sendMail(mailOptions);
+            socket.emit('person-authorized');
+        })
+
         socket.on('leave-meet', (name, email) => {
             for (let i = 0; i < people.get(meet_code).get(email).length; i++) {
                 if (people.get(meet_code).get(email)[i] == name) {
@@ -165,13 +201,28 @@ async function findMeet(meet_code) {
 async function findMeetHost(meet_code) {
     const meet = await Meet.findOne({ meet_code: meet_code });
     if (meet != null) {
-        return meet.host_email;
+        return meet;
     }
     return "";
 }
 
 async function createMeet(meet) {
     await Meet.create(meet);
+}
+
+async function addAuthorizedEmail(meet_code, email) {
+    const meet = await Meet.findOne({meet_code: meet_code});
+    meet.authorized_emails.push(email);
+    await Meet.updateOne({meet_code: meet_code}, {authorized_emails: meet.authorized_emails});
+}
+
+async function isAuthorizedEmail(meet_code, email){
+    const meet = await Meet.findOne({meet_code: meet_code});
+    if(meet.authorized_emails.indexOf(email) == -1)
+    {
+        return false;
+    }
+    return true;
 }
 
 server.listen(3000)

@@ -47,11 +47,11 @@
                 </form>
                 <br>
                 <form id="join-meet-form" action="/join-meet" method="post">
-                    <input id="meet-code" type="text" class="form-control" name="meet_code" placeholder='Enter a Code' style="width: 200px;" />
+                    <input id="meet-code" autocomplete="off" type="text" class="form-control" name="meet_code" placeholder='Enter a Code' style="width: 200px;" />
                     <button class='btn btn-secondary' type="submit">Join</button>
                     <% if(isMeetCodeValid == false){ %>
                         <br>
-                        <label class="text-danger">Please enter the valid meet code.</label>
+                        <label class="text-danger" id="meet-code-invalid-msg">Please enter the valid meet code.</label>
                         <% } %>
                 </form>
             </div>
