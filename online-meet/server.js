@@ -95,10 +95,6 @@ app.get('/:meet', async(req, res) => {
     }
 })
 
-app.get('/leave/:meet', (req, res) => {
-    res.render("leave-meet", { meet_code: req.params.meet });
-})
-
 io.on('connection', socket => {
     socket.on('join-meet', (meet_code, userId, name, email, profile_img) => {
         if (!people.get(meet_code).has(email)) {
@@ -107,10 +103,6 @@ io.on('connection', socket => {
         people.get(meet_code).get(email).push(name);
         socket.join(meet_code)
         socket.broadcast.to(meet_code).emit('user-connected', userId)
-
-        // socket.on('present-screen', () => {
-        //     socket.broadcast.to(meet_code).emit('screen-presented')
-        // })
 
         socket.on('message', (message) => {
             io.to(meet_code).emit('createMessage', message)

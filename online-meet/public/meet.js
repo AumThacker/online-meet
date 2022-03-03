@@ -4,13 +4,18 @@ const myPeer = new Peer(undefined, {
     host: '/',
     port: '3001'
 })
+let i = 1;
 const myVideo = document.createElement('video')
+myVideo.setAttribute("id", i);
+i++;
+myVideo.setAttribute("onclick", "pinVideo(this)");
 let myVideoStream;
 const peers = {}
 let calls = [];
 let screenStream;
 let isScreenPresented = false;
 let people_list;
+let is_video_pinned = false;
 
 $("#view_people").hide();
 $("#view_requests").hide();
@@ -18,6 +23,29 @@ $(".main").hide();
 $(".request_main_page").show();
 $("#add-person-suc-msg").hide();
 $("#add-person-fail-msg").hide();
+
+const pinVideo = (obj) => {
+    if (!is_video_pinned) {
+        for (let i = 1; !!document.getElementById(i); i++) {
+            if (i != obj.id) {
+                $(`#${i}`).hide();
+            }
+        }
+        document.getElementById(obj.id).style.height = "89vh";
+        document.getElementById(obj.id).style.width = "161.5vh";
+        is_video_pinned = true;
+    }
+    else{
+        for (let i = 1; !!document.getElementById(i); i++) {
+            if (i != obj.id) {
+                $(`#${i}`).show();
+            }
+        }
+        document.getElementById(obj.id).style.height = "35vh";
+        document.getElementById(obj.id).style.width = "35vh";
+        is_video_pinned = false;
+    }
+};
 
 socket.on('show-request', (requesting_user_email, requesting_user_name, requesting_user_profile_img) => {
     if (email == host_email) {
@@ -83,18 +111,17 @@ navigator.mediaDevices.getUserMedia({
     myPeer.on('call', call => {
         call.answer(stream)
         const video = document.createElement('video')
+
+        video.setAttribute("id", i);
+        i++;
+        video.setAttribute("onclick", "pinVideo(this)");
         call.on('stream', userVideoStream => {
             addVideoStream(video, userVideoStream)
         })
     })
     socket.on('user-connected', userId => {
-        // connectToNewUser(userId, stream)
         setTimeout(connectToNewUser, 3000, userId, stream);
     })
-
-    // socket.on('screen-presented', () => {
-
-    // })
 
     socket.on("createMessage", message => {
         $("#messages").append(`<li class="message"><b>${message.name}</b><br/>${message.msg}</li>`);
@@ -124,6 +151,9 @@ socket.on('user-disconnected', userId => {
 function connectToNewUser(userId, stream) {
     const call = myPeer.call(userId, stream)
     const video = document.createElement('video')
+    video.setAttribute("id", i);
+    i++;
+    video.setAttribute("onclick", "pinVideo(this)");
     call.on('stream', userVideoStream => {
         addVideoStream(video, userVideoStream)
     })
@@ -154,6 +184,8 @@ myPeer.on('open', id => {
     }
 })
 
+
+
 const shareScreen = () => {
     navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
         const html = `
@@ -165,7 +197,6 @@ const shareScreen = () => {
         document.querySelector('.present-screen-button').innerHTML = html;
         document.getElementsByClassName('present-screen-button')[0].setAttribute('onclick', "stopScreenSharing()")
         screenStream = stream;
-        //        socket.emit('present-screen')
         document.getElementsByTagName('video')[0].srcObject = stream
         isScreenPresented = true;
         let videoTrack = screenStream.getVideoTracks()[0];
@@ -304,12 +335,10 @@ const viewPeople = () => {
 }
 
 const authorizePerson = () => {
-    if($("#email").val() != "")
-    {
+    if ($("#email").val() != "") {
         socket.emit("authorize-person", $("#email").val(), host_email, host_name);
     }
-    else
-    {
+    else {
         $("#add-person-fail-msg").show();
         setTimeout(() => {
             $("#add-person-fail-msg").hide();
@@ -350,5 +379,5 @@ const leaveMeetFromRequest = () => {
 
 const leaveMeet = () => {
     socket.emit("leave-meet", name, email);
-    document.getElementById("leave-form").action = `/leave/${meet_code}`;
+    document.getElementById("leave-form").action = "/";
 }
